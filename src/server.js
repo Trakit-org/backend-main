@@ -1,15 +1,22 @@
 import express from "express";
-import dotenv from 'dotenv'
-dotenv.config()
+
+// Load environment variables and configure the server
+import dotenv from "dotenv";
+dotenv.config();
+const PORT = process.env.PORT || 4100;
 
 const app = express();
 
-const PORT = process.env.PORT || 4100
-
+// Define basic GET route for the root endpoint
 app.get("/", (req, res) => {
   return res.status(200).send("Api working perfectly");
 });
 
-app.listen(PORT, () => {
-  console.log(`server running sucessfully at http://localhost:${PORT}`);
-});
+// Start the server
+const start = () => {
+  app.listen(PORT, () => {
+    console.log(`server running sucessfully at http://localhost:${PORT}`);
+  });
+};
+
+start();
