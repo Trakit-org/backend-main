@@ -1,9 +1,14 @@
 {
   "name": "trakit",
   "version": "1.0.0",
-  "description": "Web api to track user subsciptions",
+  "description": "Web API to track user subscriptions",
   "main": "server.js",
-  "type":"module",
+  "type": "module",
+  "contributors": [
+    "Mustapha Mohammed <mustaphamohammed0705@gmail.com> (https://github.com/mustapha0705)",
+    "Ikechukwu Ashimonye <w0nderzz2001@gmail.com> (https://github.com/tech-gecko)",
+    "James Donkor <jamesdonkor987@gmail.com> (https://github.com/donkor-james)"
+  ],
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js"
@@ -12,7 +17,11 @@
     "type": "git",
     "url": "git+https://github.com/Trakit-org/backend-main.git"
   },
-  "author": "Mustapha, Igechuku, James",
+  "keywords": [
+    "subscription",
+    "tracker",
+    "SaaS"
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/Trakit-org/backend-main/issues"
