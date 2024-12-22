@@ -1,5 +1,6 @@
 import express from "express";
 import routeNotFound from "./middleware/routeNotFound.js";
+import subscription from "./routes/subscription.js";
 
 // Load environment variables and configure the server
 import dotenv from "dotenv";
@@ -12,6 +13,8 @@ const app = express();
 app.get("/", (req, res) => {
   return res.status(200).send("Api working perfectly");
 });
+
+app.use(subscription);
 
 app.use(routeNotFound);
 
