@@ -14,7 +14,7 @@ app.get("/", (req, res) => {
   return res.status(200).send("Api working perfectly");
 });
 
-app.use(subscription);
+app.use("/api/v1/subscription", subscription);
 
 app.use(routeNotFound);
 
