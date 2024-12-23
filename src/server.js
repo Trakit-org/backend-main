@@ -1,6 +1,7 @@
 import express from "express";
 import routeNotFound from "./middleware/routeNotFound.js";
 import subscription from "./routes/subscription.js";
+import connectDB from "./config/connectDB.js";
 
 // Load environment variables and configure the server
 import dotenv from "dotenv";
