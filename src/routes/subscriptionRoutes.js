@@ -14,16 +14,14 @@ const router = express.Router();
 
 // Endpoints prefix: api/v1/subscriptions
 // Define routes
-router
-  .route("/")
+router.route("/")
   .post(createSubscription)
   .get(getAllSubscriptions)
   .delete(deleteAllSubscriptions);
 
 router.get("/search", searchSubscriptions);
 
-router
-  .route("/:id")
+router.route("/:id")
   .get(getSubscription)
   .patch(updateSubscription)
   .delete(deleteSubscription);

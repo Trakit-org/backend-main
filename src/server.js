@@ -40,15 +40,10 @@ const start = async () => {
   try {
     await connectDB(MONGO_URI);
     app.listen(PORT, () => {
-      console.log(
-        `server running sucessfully at address http://localhost:${PORT} and connected to DB`
-      );
+      console.log(`server running sucessfully at address http://localhost:${PORT} and connected to DB`);
     });
   } catch (error) {
-    console.error(
-      "Error starting the server and/or connecting to the database:",
-      error
-    );
+    console.error("Error starting the server and/or connecting to the database:", error);
   }
 };
 
