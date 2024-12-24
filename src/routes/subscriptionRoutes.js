@@ -1,5 +1,5 @@
 import express from "express";
-// Import controllers
+
 import {
   createSubscription,
   getAllSubscriptions,
@@ -7,28 +7,25 @@ import {
   getSubscription,
   updateSubscription,
   deleteSubscription,
-  searchSubscriptions
-  } from "../controllers/subscriptionControllers.js";
+  searchSubscriptions,
+} from "../controllers/subscriptionController.js";
 
-const router = express.Router(); // Create a new router instance
+const router = express.Router();
 
-// Endpoints prefix: api/v1/subscriptions (DON'T REPEAT THIS PART IN THE ENDPOINTS)
+// Endpoints prefix: api/v1/subscriptions
 // Define routes
-router.route("/")
-  .post(createSubscription) // Route for adding a new subscription for the user or guest
-  .get(getAllSubscriptions) // Route for retrieving all the user's subscription details
-  // Route for deleting all the user's subscriptions and their details
+router
+  .route("/")
+  .post(createSubscription)
+  .get(getAllSubscriptions)
   .delete(deleteAllSubscriptions);
 
-// Route for searching subscriptions for the user/guest using filter criteria
 router.get("/search", searchSubscriptions);
 
-router.route("/:id")
-  // Route for retrieving the user's subscription (with sub ID in URL) details
+router
+  .route("/:id")
   .get(getSubscription)
-  // Route for updating the user's subscription (with sub ID in URL) details
-  .put(updateSubscription)
-  // Route for deleting the user's subscription (with sub ID in URL) details
+  .patch(updateSubscription)
   .delete(deleteSubscription);
 
-export default router; // Export the router
+export default router;

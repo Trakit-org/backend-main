@@ -7,7 +7,7 @@ import {
   getReminder,
   updateReminder,
   deleteReminder
-} from "../controllers/reminderControllers.js";
+} from "../controllers/reminderController.js";
 
 const router = express.Router(); // Create a new router instance
 

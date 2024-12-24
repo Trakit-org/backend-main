@@ -1,21 +1,21 @@
 import express from "express";
-// Import controllers
+
 import {
   registerUser,
   loginUser,
   logoutUser,
   resetPasswordInit,
   resetPasswordFinal
-} from "../controllers/authControllers.js";
+} from "../controllers/authController.js";
 
-const router = express.Router(); // Create a new router instance
+const router = express.Router();
 
-// Endpoints prefix: api/v1/auth (DON'T REPEAT THIS PART IN THE ENDPOINTS)
+// Endpoints prefix: api/v1/auth
 // Define routes
-router.post("/signup", registerUser); // Route for registration
-router.post("/login", loginUser); // Route for login
-router.post("/logout", logoutUser); // Route for logout
-router.post("/reset-password", resetPasswordInit); // Route for initiating password reset
-router.put("/reset-password/:token", resetPasswordFinal); // Route for completing password reset
+router.post("/signup", registerUser);
+router.post("/login", loginUser);
+router.post("/logout", logoutUser);
+router.post("/reset-password", resetPasswordInit);
+router.patch("/reset-password/:token", resetPasswordFinal);
 
-export default router; // Export the router
+export default router;

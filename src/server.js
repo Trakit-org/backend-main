@@ -1,7 +1,7 @@
 import express from "express";
 
 // Import configs and middleware
-// import routeNotFound from "./middleware/routeNotFound.js";
+import routeNotFound from "./middleware/routeNotFound.js";
 import connectDB from "./config/connectDB.js";
 
 // Import routes
@@ -14,34 +14,41 @@ import reminderRoutes from "./routes/reminderRoutes.js";
 import dotenv from "dotenv";
 dotenv.config();
 
+const PORT = process.env.PORT || 4100;
+const MONGO_URI = process.env.MONGO_URI;
+
 const app = express();
-// Enable JSON body parsing and routeNotFound middleware.
+// Enable JSON body parsing middleware.
 app.use(express.json());
-// app.use(routeNotFound);
+app.use(express.urlencoded({ extended: false }));
 
 // Use the routers from all routes
-app.use("/api/v1/auth", authRoutes); // All auth-related routes
-app.use("/api/v1/users", userRoutes); // All user-related routes
-app.use("/api/v1/subscriptions", subscriptionRoutes); // All subscription-related routes
-app.use("/api/v1/reminders", reminderRoutes); // All reminder-related routes
+app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/user", userRoutes);
+app.use("/api/v1/subscription", subscriptionRoutes);
+app.use("/api/v1/reminder", reminderRoutes);
 
 // Define basic GET route for health check
-app.get("/status", (_, res) => {
+app.get("/", (req, res) => {
   return res.status(200).send("API working perfectly!");
 });
 
-const PORT = process.env.PORT || 4100;
-const MONGO_URI = process.env.MONGO_URI;
+app.use(routeNotFound);
 
 // Start the server
 const start = async () => {
   try {
-    // await connectDB(MONGO_URI);
+    await connectDB(MONGO_URI);
     app.listen(PORT, () => {
-      console.log(`server running sucessfully at http://localhost:${PORT}`);
+      console.log(
+        `server running sucessfully at address http://localhost:${PORT} and connected to DB`
+      );
     });
   } catch (error) {
-    console.error("Error starting the server and/or connecting to the database:", error);
+    console.error(
+      "Error starting the server and/or connecting to the database:",
+      error
+    );
   }
 };
 

@@ -5,7 +5,7 @@ import {
   getUser,
   updateUser,
   deleteUser
-  } from "../controllers/userControllers.js";
+  } from "../controllers/userController.js";
 
 // Endpoints prefix: api/v1/users (DON'T REPEAT THIS PART IN THE ENDPOINTS)
 // Define routes
