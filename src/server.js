@@ -1,7 +1,7 @@
 import express from "express";
 
 // Import configs and middleware
-import routeNotFound from "./middleware/routeNotFound.js";
+// import routeNotFound from "./middleware/routeNotFound.js";
 import connectDB from "./config/connectDB.js";
 
 // Import routes
@@ -17,7 +17,7 @@ dotenv.config();
 const app = express();
 // Enable JSON body parsing and routeNotFound middleware.
 app.use(express.json());
-app.use(routeNotFound);
+// app.use(routeNotFound);
 
 // Use the routers from all routes
 app.use("/api/v1/auth", authRoutes); // All auth-related routes
@@ -36,7 +36,7 @@ const MONGO_URI = process.env.MONGO_URI;
 // Start the server
 const start = async () => {
   try {
-    await connectDB(MONGO_URI);
+    // await connectDB(MONGO_URI);
     app.listen(PORT, () => {
       console.log(`server running sucessfully at http://localhost:${PORT}`);
     });
