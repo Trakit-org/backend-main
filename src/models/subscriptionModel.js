@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const SubscriptionSchema = new mongoose.Schema(
   {
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    service: { type: String, required: true },
+    service: { type: String, required: true, trim: true },
     price: { type: mongoose.Schema.Types.Decimal128, required: true },
     category: {
       type: String,
@@ -26,7 +26,7 @@ const SubscriptionSchema = new mongoose.Schema(
       default: 'Monthly'
     },
     nextBillingDate: { type: Date, required: true },
-    notes: String,
+    notes: { type: String, trim: true },
     active: { type: Boolean, default: true},
     reminders: [{ type: mongoose.Schema.Types.ObjectId, ref: "Reminder" }],
   },
