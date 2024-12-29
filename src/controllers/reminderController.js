@@ -1,29 +1,105 @@
-export const createReminder = (req, res) => {
-  // TODO: Implement real business logic. 
-  res.send("Create a reminder");
-};
-  
-export const getAllReminders = (req, res) => {
-  // TODO: Implement real business logic. 
-  res.send("Get all reminders");
-};
-  
-export const deleteAllReminders = (req, res) => {
-  // TODO: Implement real business logic. 
-  res.send("Delete all reminders");
-};
-  
-export const getReminder = (req, res) => {
-  // TODO: Implement real business logic. 
-  res.send("Get a reminder");
-};
-  
-export const updateReminder = (req, res) => {
-  // TODO: Implement real business logic. 
-  res.send("Update a reminder");
+import Reminder from "../models/reminderModel.js";
+
+export const createReminder = async (req, res) => {
+  try {
+    const data = { ...req.body, };
+    const reminder = await Reminder.create(data);
+
+    return res.status(201).json({ msg: "Reminder created sucessfully", reminder });
+  } catch (error) {
+    console.error("error creating reminder:", error);
+    return res.status(500).json({ msg: "Failed to create reminder" });
+  }
 };
 
-export const deleteReminder = (req, res) => {
-  // TODO: Implement real business logic. 
-  res.send("Delete a reminder");
+export const getReminder = async (req, res) => {
+  try {
+    const { id: reminderID } = req.params;
+    const reminder = await Reminder.findById(reminderID);
+
+    if (!reminder) {
+      return res.status(404).json({
+        msg: `A reminder with the id ${reminderID} was not found`
+      });
+    }
+    return res.status(200).json({ reminder });
+  } catch (error) {
+    console.error("error fetching reminder:", error);
+    return res.status(500).json({ msg: "Failed to fetch reminder" });
+  }
+};
+
+export const getAllReminders = async (req, res) => {
+  try {
+    // Pagination
+    const limit = parseInt(req.query.limit) || 10;
+    const page = parseInt(req.query.page) || 1;
+    const reminders = await Reminder.find({})
+      .limit(limit)
+      .skip((page - 1) * limit);
+
+    if (reminders.length === 0) {
+      return res.status(404).json({ msg: "You have no reminders" });
+    }
+    return res.status(200).json({ nbHits: reminders.length, reminders });
+  } catch (error) {
+    console.error("error fetching reminders:", error);
+    return res.status(500).json({ msg: "Failed to fetch reminders" });
+  }
+};
+
+export const updateReminder = async (req, res) => {
+  try {
+    const { id: reminderID } = req.params;
+    const data = { ...req.body, };
+    const updatedReminder = await Reminder.findByIdAndUpdate(
+      reminderID,
+      data,
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedReminder) {
+      return res.status(404).json({
+        msg: `A reminder with the id ${reminderID} was not found`,
+      });
+    }
+
+    return res.status(200).json({ msg: "Reminder updated successfully", updatedReminder });
+  } catch (error) {
+    console.error("error updating reminder:", error);
+    return res.status(500).json({ msg: "Failed to update reminder" });
+  }
+};
+
+export const deleteReminder = async (req, res) => {
+  try {
+    const { id: reminderID } = req.params;
+    const reminder = await Reminder.findByIdAndDelete(reminderID);
+
+    if (!reminder) {
+      return res.status(404).json({
+        msg: `A reminder with the id ${reminderID} was not found`
+      });
+    }
+    return res.status(200).json({ msg: "Reminder deleted successfully" });
+  } catch (error) {
+    console.error("error deleting reminder:", error);
+    return res.status(500).json({ msg: "Failed to delete reminder" });
+  }
+};
+
+export const deleteAllReminders = async (req, res) => {
+  try {
+    const result = await Reminder.deleteMany({}); 
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ msg: "No reminders found to delete" });
+    }
+    return res.status(200).json({
+      msg: `All ${result.deletedCount} reminders deleted successfully`
+    });
+  } catch (error) {
+    console.error("error deleting reminders:", error);
+    return res.status(500).json({ msg: "Failed to delete all reminders" });
+  }
 };

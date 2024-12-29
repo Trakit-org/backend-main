@@ -12,6 +12,8 @@ import {
 
 const router = express.Router();
 
+// TODO: Auth and validation for these controllers.
+
 // Endpoints prefix: api/v1/subscriptions
 // Define routes
 router.route("/")
