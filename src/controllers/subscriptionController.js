@@ -1,9 +1,13 @@
-// TODO: Auth, validation and pagination (not all) for these controllers.
 import Subscription from "../models/subscriptionModel.js";
 
 export const getAllSubscriptions = async (req, res) => {
   try {
-    const subscriptions = await Subscription.find({});
+    const limit = parseInt(req.query.limit) || 10;
+    const page = parseInt(req.query.page) || 1;
+
+    const subscriptions = await Subscription.find({})
+      .limit(limit)
+      .skip((page - 1) * limit);
     if (subscriptions.length === 0) {
       return res
         .status(404)
@@ -13,7 +17,7 @@ export const getAllSubscriptions = async (req, res) => {
       .status(200)
       .json({ nbHits: subscriptions.length, subscriptions });
   } catch (error) {
-    console.error("Error fetching subscriptions:", error);
+    console.error("error fetching subscriptions:", error);
     return res.status(500).json({ msg: "Failed to fetch subscriptions" });
   }
 };
@@ -25,13 +29,13 @@ export const getSubscription = async (req, res) => {
 
     if (!subscription) {
       return res.status(404).json({
-        msg: `A subscription with the id of ${subscriptionID} was not found`,
+        msg: `A subscription with the id of ${subscriptionID} was not found`
       });
     }
     return res.status(200).json({ subscription });
   } catch (error) {
     console.error("error fetching subscription:", error);
-    return res.status(500).json("Failed to fetch subscription");
+    return res.status(500).json({ msg: "Failed to fetch subscription" });
   }
 };
 
@@ -89,10 +93,10 @@ export const deleteSubscription = async (req, res) => {
         msg: `A subscription with the id of ${subscriptionID} was not found`
       });
     }
-    return res.status(200).json({ msg: "Subscription deleted successfully", subscription });
+    return res.status(200).json({ msg: "Subscription deleted successfully" });
   } catch (error) {
     console.error("error deleting subscription:", error);
-    return res.status(500).json("Failed to delete subscription");
+    return res.status(500).json({ msg: "Failed to delete subscription" });
   }
 };
 
@@ -108,13 +112,15 @@ export const deleteAllSubscriptions = async (req, res) => {
     });
   } catch (error) {
     console.error("error deleting subscriptions:", error);
-    return res.status(500).json("Failed to delete subscriptions");
+    return res.status(500).json({ msg: "Failed to delete all subscriptions" });
   }
 };
 
 export const searchSubscriptions = async (req, res) => {
   try {
     const { service, category, billingCycle, active } = req.query;
+    const limit = parseInt(req.query.limit) || 10;
+    const page = parseInt(req.query.page) || 1;
 
     const filter = {};
     if (service) filter.service = new RegExp(service, "i"); // Case-insensitive regex search
@@ -122,14 +128,17 @@ export const searchSubscriptions = async (req, res) => {
     if (billingCycle) filter.billingCycle = billingCycle;
     if (active !== undefined) filter.active = active === "true";
 
-    const subscriptions = await Subscription.find(filter);
+    const subscriptions = await Subscription.find(filter)
+      // Pagination
+      .limit(limit)
+      .skip((page - 1) * limit);
 
     if (subscriptions.length === 0) {
       return res.status(404).json({ msg: "No subscriptions match the search criteria" });
     }
     return res.status(200).json({ nbHits: subscriptions.length, subscriptions });
   } catch (error) {
-    console.error("Error fetching subscriptions:", error);
+    console.error("error fetching subscriptions:", error);
     return res.status(500).json({ msg: "Failed to fetch subscriptions" });
   }
 };
