@@ -1,5 +1,6 @@
 import Reminder from "../models/reminderModel.js";
 
+// TODO: Auth and/or validation for these controllers.
 export const createReminder = async (req, res) => {
   try {
     const data = { ...req.body, };

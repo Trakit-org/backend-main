@@ -11,6 +11,8 @@ import {
 
 const router = express.Router(); // Create a new router instance
 
+// TODO: Auth and/or validation for these controllers.
+
 // Endpoints prefix: api/v1/reminders (DON'T REPEAT THIS PART IN THE ENDPOINTS)
 // Define routes
 router.route("/")

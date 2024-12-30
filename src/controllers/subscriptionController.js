@@ -1,5 +1,6 @@
 import Subscription from "../models/subscriptionModel.js";
 
+// TODO: Auth and/or validation for these controllers.
 export const getAllSubscriptions = async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 10;
