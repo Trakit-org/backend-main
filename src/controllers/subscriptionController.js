@@ -1,7 +1,14 @@
 import Subscription from "../models/subscriptionModel.js";
+import generateRandomString from "../utils/generateRandomString.js";
+
+const guestMap = new Map();
 
 // TODO: Auth and/or validation for these controllers.
 export const getAllSubscriptions = async (req, res) => {
+  if (!req.user) {
+    // Perform guest actions.
+  }
+
   try {
     const limit = parseInt(req.query.limit) || 10;
     const page = parseInt(req.query.page) || 1;
@@ -41,6 +48,39 @@ export const getSubscription = async (req, res) => {
 };
 
 export const createSubscription = async (req, res) => {
+  if (!req.user) {
+    try {
+      const data = { ...req.body, };
+      const { guestId } = req.cookies;
+
+      if (!guestId) {
+        const newGuestId = generateRandomString();
+        guestMap.set(newGuestId, { subscriptions: [data] });
+        res.cookie('guestId', newGuestId, { httpOnly: true });
+
+        const guest = guestMap.get(newGuestId);
+        return res.status(201).json({
+          msg: "Subscription created successfully", guest
+        });
+      }
+
+      const guest = guestMap.get(guestId);
+
+      if (!guest) {
+        return res.status(404).json({ msg: "Guest not found" });
+      }
+
+      guest.subscriptions.push(data);
+
+      return res.status(201).json({
+        msg: "Subscription created successfully", guest
+      });
+    } catch (error) {
+      console.error("error creating guest subscription:", error);
+      return res.status(500).json({ msg: "Failed to create guest subscription" });
+    }
+  }
+
   try {
     const data = {
       ...req.body,
@@ -51,7 +91,7 @@ export const createSubscription = async (req, res) => {
       .status(201)
       .json({ msg: "Subscription created successfully", subscription });
   } catch (error) {
-    console.error("error creating subsription:", error);
+    console.error("error creating subscription:", error);
     return res.status(500).json({ msg: "Failed to create subscription" });
   }
 };

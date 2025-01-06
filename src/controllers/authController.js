@@ -45,8 +45,13 @@ export const loginUser = async (req, res) => {
 };
 
 export const logoutUser = (req, res) => {
-  // TODO: Implement real business logic. 
-  res.send("Log a user out");
+  req.session.destroy(error => {
+    if (error) {
+      console.error("error destroying session:", error);
+      return res.status(500).json({ msg: "Failed to log user out" });
+    }
+    return res.status(200).json({ msg: "Logged out successfully" });
+  });
 };
 
 export const resetPasswordInit = (req, res) => {
