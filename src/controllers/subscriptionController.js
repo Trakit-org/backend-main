@@ -3,10 +3,26 @@ import generateRandomString from "../utils/generateRandomString.js";
 
 const guestMap = new Map();
 
-// TODO: Auth and/or validation for these controllers.
+// TODO: Auth and/or validation for these controllers
 export const getAllSubscriptions = async (req, res) => {
   if (!req.user) {
-    // Perform guest actions.
+    try {
+      const { guestId } = req.cookies;
+      if (!guestId) {
+        return res.status(404).json({ msg: "Guest ID not found" });
+      }
+
+      const guest = guestMap.get(guestId);
+      if (!guest || guest.subscriptions.length === 0) {
+        return res.status(404).json({ msg: "Guest or subscriptions not found" });
+      }
+
+      return res.status(200)
+        .json({ nbHits: guest.subscriptions.length, subscriptions: guest.subscriptions });
+    } catch (error) {
+      console.error("error fetching guest subscriptions:", error);
+      return res.status(500).json({ msg: "Failed to fetch guest subscriptions" });
+    } 
   }
 
   try {
@@ -60,7 +76,7 @@ export const createSubscription = async (req, res) => {
 
         const guest = guestMap.get(newGuestId);
         return res.status(201).json({
-          msg: "Subscription created successfully", guest
+          msg: "Subscription created successfully", subscriptions: guest.subscriptions
         });
       }
 
@@ -73,7 +89,7 @@ export const createSubscription = async (req, res) => {
       guest.subscriptions.push(data);
 
       return res.status(201).json({
-        msg: "Subscription created successfully", guest
+        msg: "Subscription created successfully", subscriptions: guest.subscriptions
       });
     } catch (error) {
       console.error("error creating guest subscription:", error);
