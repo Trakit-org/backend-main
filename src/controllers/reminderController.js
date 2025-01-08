@@ -10,7 +10,7 @@ export const createReminder = async (req, res) => {
     const data = { ...req.body, };
     const reminder = await Reminder.create(data);
 
-    return res.status(201).json({ msg: "Reminder created sucessfully", reminder });
+    return res.status(201).json({ msg: "Reminder created successfully", reminder });
   } catch (error) {
     console.error("error creating reminder:", error);
     return res.status(500).json({ msg: "Failed to create reminder" });
@@ -18,6 +18,10 @@ export const createReminder = async (req, res) => {
 };
 
 export const getReminder = async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ msg: "You must be logged in to fetch reminders" });
+  }
+
   try {
     const { id: reminderID } = req.params;
     const reminder = await Reminder.findById(reminderID);
@@ -35,6 +39,10 @@ export const getReminder = async (req, res) => {
 };
 
 export const getAllReminders = async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ msg: "You must be logged in to fetch reminders" });
+  }
+
   try {
     // Pagination
     const limit = parseInt(req.query.limit) || 10;
@@ -54,6 +62,10 @@ export const getAllReminders = async (req, res) => {
 };
 
 export const updateReminder = async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ msg: "You must be logged in to update reminders" });
+  }
+
   try {
     const { id: reminderID } = req.params;
     const data = { ...req.body, };
@@ -77,6 +89,10 @@ export const updateReminder = async (req, res) => {
 };
 
 export const deleteReminder = async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ msg: "You must be logged in to delete reminders" });
+  }
+
   try {
     const { id: reminderID } = req.params;
     const reminder = await Reminder.findByIdAndDelete(reminderID);
@@ -94,6 +110,10 @@ export const deleteReminder = async (req, res) => {
 };
 
 export const deleteAllReminders = async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ msg: "You must be logged in to delete reminders" });
+  }
+
   try {
     const result = await Reminder.deleteMany({}); 
 

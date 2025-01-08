@@ -1,9 +1,11 @@
+import bcrypt from "bcrypt"
+import jwt from "jsonwebtoken";
 import User from "../models/userModel.js";
 
 // TODO: Auth and/or validation for these controllers.
 export const registerUser = async (req, res) => {
   try {
-    const data = { ...req.body, };
+    const body = { ...req.body, };
     const user = await User.create(data);
     const { _id, fullName, email, enableNotifications } = user;
 
@@ -19,6 +21,7 @@ export const registerUser = async (req, res) => {
     if (error.name === "ValidationError") { // Handle mongoose validation errors
       return res.status(400).json({ msg: error.message });
     }
+
     return res.status(500).json({ msg: "Failed to create user" });
   }
 };
@@ -27,16 +30,20 @@ export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
-
     if (!user) {
       return res.status(404).json({ msg: "No user found for the provided email" });
     }
 
-    // Password verification and session init will go here (auth logic in utils/)
+    const isPasswordCorrect = await bcrypt.compare(password, user.hashedPassword);
+    if (!isPasswordCorrect) {
+      return res.status(401).json({ msg: "Invalid credentials" });
+    }
+
+    const token = jwt.sign({ userID: user._id }, process.env.JWT_SECRET, { expiresIn: '24h' });
 
     const { _id, fullName, enableNotifications } = user;
     return res.status(200).json({
-      msg: "Logged in successfully", user: { _id, fullName, email, enableNotifications }
+      msg: "Logged in successfully", user: { _id, fullName, email, enableNotifications }, token
     });
   } catch (error) {
     console.error("error logging in user:", error);

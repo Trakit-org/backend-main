@@ -29,7 +29,7 @@ app.use(cookieParser());
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/subscriptions", optionalAuth, subscriptionRoutes);
-app.use("/api/v1/reminders", reminderRoutes);
+app.use("/api/v1/reminders", optionalAuth, reminderRoutes);
 
 // Define basic GET route for health check
 app.get("/", (req, res) => {
