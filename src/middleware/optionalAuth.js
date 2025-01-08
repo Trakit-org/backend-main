@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 
 const optionalAuth = (req, res, next) => {
   const authHeader = req.headers.authorization;
-  const token = authHeader.split(' ')[1];
+  const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
 
   if (!token) {
     req.user = null; // No token, treat as a guest or return error in controllers
