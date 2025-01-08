@@ -2,23 +2,38 @@ import Subscription from "../models/subscriptionModel.js";
 import generateRandomString from "../utils/generateRandomString.js";
 
 const guestMap = new Map();
+const subscriptionMap = new Map();
 
 // TODO: Auth and/or validation for these controllers
 export const getAllSubscriptions = async (req, res) => {
   if (!req.user) {
     try {
-      const { guestId } = req.cookies;
-      if (!guestId) {
-        return res.status(404).json({ msg: "Guest ID not found" });
+      const { guestID } = req.cookies;
+      if (!guestID) {
+        return res.status(404).json({ msg: "Guest ID not found in cookies" });
       }
 
-      const guest = guestMap.get(guestId);
-      if (!guest || guest.subscriptions.length === 0) {
-        return res.status(404).json({ msg: "Guest or subscriptions not found" });
+      const subIDs = guestMap.get(guestID);
+      if (!subIDs) {
+        return res.status(404).json({ msg: "Guest not found" });
+      }
+
+      const subscriptions = [];
+      for (const subID of subIDs) {
+        const subscription = subscriptionMap.get(subID);
+        if (!subscription) {
+          console.warn(`guest subscription with ID ${subID} not found`);
+          continue;
+        }
+        subscriptions.push(subscription);
+      }
+
+      if (subscriptions.length === 0) {
+        return res.status(404).json({ msg: "No subscriptions found for this guest" });
       }
 
       return res.status(200)
-        .json({ nbHits: guest.subscriptions.length, subscriptions: guest.subscriptions });
+        .json({ nbHits: subscriptions.length, subscriptions });
     } catch (error) {
       console.error("error fetching guest subscriptions:", error);
       return res.status(500).json({ msg: "Failed to fetch guest subscriptions" });
@@ -47,6 +62,24 @@ export const getAllSubscriptions = async (req, res) => {
 };
 
 export const getSubscription = async (req, res) => {
+  if (!req.user) {
+    try {
+      const { id: subscriptionID } = req.params;
+
+      const subscription = subscriptionMap.get(subscriptionID);
+      if (!subscription) {
+        return res.status(404).json({
+          msg: `A guest subscription with ID ${subscriptionID} was not found`
+        });
+      }
+
+      return res.status(200).json({ subscription });
+    } catch (error) {
+      console.error("error fetching guest subscription:", error);
+      return res.status(500).json({ msg: "Failed to fetch guest subscription" });
+    }
+  }
+
   try {
     const { id: subscriptionID } = req.params;
     const subscription = await Subscription.findById(subscriptionID);
@@ -67,29 +100,35 @@ export const createSubscription = async (req, res) => {
   if (!req.user) {
     try {
       const data = { ...req.body, };
-      const { guestId } = req.cookies;
+      const { guestID } = req.cookies;
 
-      if (!guestId) {
-        const newGuestId = generateRandomString();
-        guestMap.set(newGuestId, { subscriptions: [data] });
-        res.cookie('guestId', newGuestId, { httpOnly: true });
+      if (!guestID) {
+        const newGuestID = generateRandomString();
+        const newSubscriptionID = generateRandomString();
+        guestMap.set(newGuestID, [newSubscriptionID]);
+        subscriptionMap.set(newSubscriptionID, data);
+        res.cookie('guestID', newGuestID, { httpOnly: true });
 
-        const guest = guestMap.get(newGuestId);
         return res.status(201).json({
-          msg: "Subscription created successfully", subscriptions: guest.subscriptions
+          msg: "Subscription created successfully",
+          subscriptionID: newSubscriptionID,
+          data
         });
       }
 
-      const guest = guestMap.get(guestId);
-
-      if (!guest) {
+      const subscriptions = guestMap.get(guestID);
+      if (!subscriptions) {
         return res.status(404).json({ msg: "Guest not found" });
       }
 
-      guest.subscriptions.push(data);
+      const newSubID = generateRandomString();
+      subscriptions.push(newSubID);
+      subscriptionMap.set(newSubID, data);
 
       return res.status(201).json({
-        msg: "Subscription created successfully", subscriptions: guest.subscriptions
+        msg: "Subscription created successfully",
+        subscriptionID: newSubID,
+        data
       });
     } catch (error) {
       console.error("error creating guest subscription:", error);
@@ -113,6 +152,32 @@ export const createSubscription = async (req, res) => {
 };
 
 export const updateSubscription = async (req, res) => {
+  if (!req.user) {
+    try {
+      const newData = { ...req.body, };
+      const { id: subscriptionID } = req.params;
+
+      if (!subscriptionMap.has(subscriptionID)) {
+        return res.status(404).json({
+          msg: `A guest subscription with ID ${subscriptionID} was not found`,
+        });
+      }
+      subscriptionMap.set(subscriptionID, {
+        ...subscriptionMap.get(subscriptionID),  // Get the current subscription data
+        ...newData  // Merge the new data with the existing subscription (partial update)
+      });
+
+      const updatedSubscription = subscriptionMap.get(subscriptionID);
+
+      return res.status(200).json({
+        msg: "Guest subscription updated successfully", updatedSubscription
+      });
+    } catch (error) {
+      console.error("error updating guest subsription:", error);
+      return res.status(500).json({ msg: "Failed to update guest subscription" });
+    }
+  }
+
   try {
     const { id: subscriptionID } = req.params;
 
@@ -141,6 +206,24 @@ export const updateSubscription = async (req, res) => {
 };
 
 export const deleteSubscription = async (req, res) => {
+  if (!req.user) {
+    try {
+      const { id: subscriptionID } = req.params;
+
+      const isDeleted = subscriptionMap.delete(subscriptionID);
+      if (!isDeleted) {
+        return res.status(404).json({
+          msg: `A guest subscription with ID ${subscriptionID} was not found`,
+        });
+      }
+
+      return res.status(200).json({ msg: "Guest subscription deleted successfully" });
+    } catch (error) {
+      console.error("error deleting guest subscription:", error);
+      return res.status(500).json({ msg: "Failed to delete guest subscription" });
+    }
+  }
+
   try {
     const { id: subscriptionID } = req.params;
     const subscription = await Subscription.findByIdAndDelete(subscriptionID);
@@ -158,6 +241,32 @@ export const deleteSubscription = async (req, res) => {
 };
 
 export const deleteAllSubscriptions = async (req, res) => {
+  if (!req.user) {
+    try {
+      const { guestID } = req.cookies;
+      if (!guestID) {
+        return res.status(404).json({ msg: "Guest ID not found in cookies" });
+      }
+
+      const subIDs = guestMap.get(guestID);
+      if (!subIDs) {
+        return res.status(404).json({ msg: "No subscriptions found to delete" });
+      }
+
+      for (const subID of subIDs) {
+        const isDeleted = subscriptionMap.delete(subID);
+        if (!isDeleted) {
+          console.warn(`guest subscription with ID ${subID} not found`);
+        }
+      }
+
+      return res.status(200).json({ msg: "All guest subscriptions deleted successfully" });
+    } catch (error) {
+      console.error("error deleting guest subscriptions:", error);
+      return res.status(500).json({ msg: "Failed to delete guest subscriptions" });
+    } 
+  }
+
   try {
     const result = await Subscription.deleteMany({}); 
 
@@ -174,6 +283,10 @@ export const deleteAllSubscriptions = async (req, res) => {
 };
 
 export const searchSubscriptions = async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ msg: "You must be logged in to access subscription search" });
+  }
+
   try {
     const { service, category, billingCycle, active } = req.query;
     const limit = parseInt(req.query.limit) || 10;
