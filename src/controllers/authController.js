@@ -5,7 +5,10 @@ import User from "../models/userModel.js";
 // TODO: Auth and/or validation for these controllers.
 export const registerUser = async (req, res) => {
   try {
-    const body = { ...req.body, };
+    const { password, ...otherData } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const data = { ...otherData, hashedPassword: hashedPassword };
     const user = await User.create(data);
     const { _id, fullName, email, enableNotifications } = user;
 
@@ -36,7 +39,7 @@ export const loginUser = async (req, res) => {
 
     const isPasswordCorrect = await bcrypt.compare(password, user.hashedPassword);
     if (!isPasswordCorrect) {
-      return res.status(401).json({ msg: "Invalid credentials" });
+      return res.status(401).json({ msg: "Incorrect password" });
     }
 
     const token = jwt.sign({ userID: user._id }, process.env.JWT_SECRET, { expiresIn: '24h' });
@@ -52,13 +55,17 @@ export const loginUser = async (req, res) => {
 };
 
 export const logoutUser = (req, res) => {
-  req.session.destroy(error => {
-    if (error) {
-      console.error("error destroying session:", error);
-      return res.status(500).json({ msg: "Failed to log user out" });
-    }
+  if (!req.user) {
+    return res.status(401).json({ msg: "You must be logged in to log out" });
+  }
+
+  try {
+    // The client will handle removing the token from storage
     return res.status(200).json({ msg: "Logged out successfully" });
-  });
+  } catch (error) {
+    console.error("error logging out user:", error);
+    return res.status(500).json({ msg: "Failed to log user out" });
+  }
 };
 
 export const resetPasswordInit = (req, res) => {

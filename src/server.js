@@ -26,8 +26,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 // Use the routers from all routes
-app.use("/api/v1/auth", authRoutes);
-app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/auth", optionalAuth, authRoutes);
+app.use("/api/v1/users", optionalAuth, userRoutes);
 app.use("/api/v1/subscriptions", optionalAuth, subscriptionRoutes);
 app.use("/api/v1/reminders", optionalAuth, reminderRoutes);
 
