@@ -3,6 +3,8 @@ import express from "express";
 // Import configs and middleware
 import routeNotFound from "./middleware/routeNotFound.js";
 import connectDB from "./config/connectDB.js";
+import optionalAuth from "./middleware/optionalAuth.js";
+import cookieParser from "cookie-parser";
 
 // Import routes
 import authRoutes from "./routes/authRoutes.js";
@@ -18,15 +20,16 @@ const PORT = process.env.PORT || 4100;
 const MONGO_URI = process.env.MONGO_URI;
 
 const app = express();
-// Enable JSON body parsing middleware.
+// Enable JSON body and cookie parsing middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
 
 // Use the routers from all routes
 app.use("/api/v1/auth", authRoutes);
-app.use("/api/v1/user", userRoutes);
-app.use("/api/v1/subscription", subscriptionRoutes);
-app.use("/api/v1/reminder", reminderRoutes);
+app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/subscriptions", optionalAuth, subscriptionRoutes);
+app.use("/api/v1/reminders", optionalAuth, reminderRoutes);
 
 // Define basic GET route for health check
 app.get("/", (req, res) => {
