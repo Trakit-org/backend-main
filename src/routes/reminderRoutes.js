@@ -13,7 +13,7 @@ const router = express.Router(); // Create a new router instance
 
 // TODO: Auth and/or validation for these controllers.
 
-// Endpoints prefix: api/v1/reminders (DON'T REPEAT THIS PART IN THE ENDPOINTS)
+// Endpoints prefix: api/v1/reminders
 // Define routes
 router.route("/")
   .post(createReminder) // Route for adding a new reminder for the user
