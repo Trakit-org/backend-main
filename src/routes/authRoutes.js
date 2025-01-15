@@ -5,7 +5,8 @@ import {
   loginUser,
   logoutUser,
   resetPasswordInit,
-  resetPasswordFinal
+  resetPasswordFinal,
+  changePassword
 } from "../controllers/authController.js";
 
 const router = express.Router();
@@ -19,5 +20,6 @@ router.post("/login", loginUser);
 router.post("/logout", logoutUser);
 router.post("/reset-password", resetPasswordInit);
 router.patch("/reset-password/:token", resetPasswordFinal);
+router.patch("/change-password", changePassword);
 
 export default router;
