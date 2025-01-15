@@ -1,4 +1,5 @@
 import express from "express";
+import { initializeReminders, setupCleanupJob } from "./utils/reminderService.js";
 
 // Import configs and middleware
 import routeNotFound from "./middleware/routeNotFound.js";
@@ -42,11 +43,18 @@ app.use(routeNotFound);
 const start = async () => {
   try {
     await connectDB(MONGO_URI);
+    console.log("connected to MongoDB...");
+
+    await setupCleanupJob();
+
+    await initializeReminders();
+    console.log("reminders initialized...");
+
     app.listen(PORT, () => {
-      console.log(`server running sucessfully at address http://localhost:${PORT} and connected to DB`);
+      console.log(`server running successfully on http://localhost:${PORT}...`);
     });
   } catch (error) {
-    console.error("Error starting the server and/or connecting to the database:", error);
+    console.error("error starting the server:", error);
   }
 };
 

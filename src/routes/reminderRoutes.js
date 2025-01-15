@@ -6,7 +6,8 @@ import {
   deleteAllReminders,
   getReminder,
   updateReminder,
-  deleteReminder
+  deleteReminder,
+  getUpcomingRenewals
 } from "../controllers/reminderController.js";
 
 const router = express.Router(); // Create a new router instance
@@ -24,5 +25,8 @@ router.route("/:id")
   .get(getReminder) // Route for retrieving the user's reminder (with reminder ID in URL)
   .put(updateReminder) // Route for updating the user's reminder (with reminder ID in URL)
   .delete(deleteReminder); // Route for deleting the user's reminder (with reminder ID in URL)
+
+// Route for retrieving all upcoming reminders with time within a week
+router.get("/upcoming-renewals", getUpcomingRenewals);
 
 export default router; // Export the router

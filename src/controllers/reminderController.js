@@ -19,7 +19,7 @@ export const createReminder = async (req, res) => {
 
 export const getReminder = async (req, res) => {
   if (!req.user) {
-    return res.status(401).json({ msg: "You must be logged in to fetch reminders" });
+    return res.status(401).json({ msg: "You must be logged in to access reminders" });
   }
 
   try {
@@ -40,7 +40,7 @@ export const getReminder = async (req, res) => {
 
 export const getAllReminders = async (req, res) => {
   if (!req.user) {
-    return res.status(401).json({ msg: "You must be logged in to fetch reminders" });
+    return res.status(401).json({ msg: "You must be logged in to access reminders" });
   }
 
   try {
@@ -54,6 +54,7 @@ export const getAllReminders = async (req, res) => {
     if (reminders.length === 0) {
       return res.status(404).json({ msg: "You have no reminders" });
     }
+
     return res.status(200).json({ nbHits: reminders.length, reminders });
   } catch (error) {
     console.error("error fetching reminders:", error);
@@ -128,3 +129,30 @@ export const deleteAllReminders = async (req, res) => {
     return res.status(500).json({ msg: "Failed to delete all reminders" });
   }
 };
+
+export const getUpcomingRenewals = async(req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ msg: "You must be logged in to access upcoming renewals" });
+  }
+
+  try {
+    const aWeekAhead = new Date();
+    aWeekAhead.setDate(aWeekAhead.getDate() + 7);
+
+    const upcomingReminders = await Reminder.find({
+      "subscription.user": req.user._id,
+      reminderTime: { $lte: aWeekAhead },
+    })
+      .populate("subscription")
+      .sort({ reminderTime: 1 });
+
+    if (upcomingReminders.length === 0) {
+      return res.status(404).json({ msg: "No reminders found within the next week" });
+    }
+
+    return res.status(200).json({ nbHits: upcomingReminders.length, upcomingReminders });
+  } catch (error) {
+    console.error("error retrieving upcoming reminders:", error);
+    return res.status(500).json({ msg: "Failed to retrieve upcoming reminders" });
+  }
+}
