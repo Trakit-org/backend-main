@@ -139,10 +139,11 @@ export const getUpcomingRenewals = async(req, res) => {
     const aWeekAhead = new Date();
     aWeekAhead.setDate(aWeekAhead.getDate() + 7);
 
-    const upcomingReminders = await Reminder.find({
-      "subscription.user": req.user._id,
-      reminderTime: { $lte: aWeekAhead },
-    })
+    const upcomingReminders = await Reminder
+      .find({
+        "subscription.user": req.user._id,
+        reminderTime: { $lte: aWeekAhead },
+      })
       .populate("subscription")
       .sort({ reminderTime: 1 });
 

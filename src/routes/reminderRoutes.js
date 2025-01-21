@@ -1,5 +1,5 @@
 import express from "express";
-// Import controllers
+
 import {
   createReminder,
   getAllReminders,
@@ -10,21 +10,34 @@ import {
   getUpcomingRenewals
 } from "../controllers/reminderController.js";
 
-const router = express.Router(); // Create a new router instance
+import {
+  validateCreateReminder,
+  validateReminderId,
+  validateGetAllReminders,
+  validateUpdateReminder
+} from "../middleware/reminderValidator.js";
 
-// TODO: Auth and/or validation for these controllers.
+import { handleValidationErrors } from "../middleware/validationErrorHandler.js";
+
+const router = express.Router(); // Create a new router instance
 
 // Endpoints prefix: api/v1/reminders
 // Define routes
 router.route("/")
-  .post(createReminder) // Route for adding a new reminder for the user
-  .get(getAllReminders) // // Route for retrieving all the user's reminders
-  .delete(deleteAllReminders); // Route for deleting all the user's reminders
+  // Route for adding a new reminder for the user
+  .post(validateCreateReminder, handleValidationErrors, createReminder)
+  // Route for retrieving all the user's reminders
+  .get(validateGetAllReminders, handleValidationErrors, getAllReminders)
+  // Route for deleting all the user's reminders
+  .delete(deleteAllReminders);
 
 router.route("/:id")
-  .get(getReminder) // Route for retrieving the user's reminder (with reminder ID in URL)
-  .put(updateReminder) // Route for updating the user's reminder (with reminder ID in URL)
-  .delete(deleteReminder); // Route for deleting the user's reminder (with reminder ID in URL)
+  // Route for retrieving the user's reminder (with reminder ID in URL)
+  .get(validateReminderId, handleValidationErrors, getReminder)
+  // Route for updating the user's reminder (with reminder ID in URL)
+  .patch(validateReminderId, validateUpdateReminder, handleValidationErrors, updateReminder)
+  // Route for deleting the user's reminder (with reminder ID in URL)
+  .delete(validateReminderId, handleValidationErrors, deleteReminder);
 
 // Route for retrieving all upcoming reminders with time within a week
 router.get("/upcoming-renewals", getUpcomingRenewals);
