@@ -5,13 +5,16 @@ import {
   getUser,
   updateUser,
   deleteUser
-  } from "../controllers/userController.js";
+} from "../controllers/userController.js";
+
+import { validateUpdateUser } from "../middleware/userValidator.js";
+import { handleValidationErrors } from "../middleware/validationErrorHandler.js";
 
 // Endpoints prefix: api/v1/users
 // Define routes
 router.route("/me")
   .get(getUser)
-  .put(updateUser)
+  .patch(validateUpdateUser, handleValidationErrors, updateUser)
   .delete(deleteUser);
 
 export default router;

@@ -9,17 +9,28 @@ import {
   changePassword
 } from "../controllers/authController.js";
 
-const router = express.Router();
+import {
+  validateRegister,
+  validateLogin,
+  validateResetPasswordInit,
+  validateResetPasswordFinal,
+  validateChangePassword,
+} from "../middleware/authValidator.js";
+import { handleValidationErrors } from "../middleware/validationErrorHandler.js";
 
-// TODO: Auth and/or validation for these controllers.
+const router = express.Router();
 
 // Endpoints prefix: api/v1/auth
 // Define routes
-router.post("/signup", registerUser);
-router.post("/login", loginUser);
+router.post("/signup", validateRegister, handleValidationErrors, registerUser);
+router.post("/login", validateLogin, handleValidationErrors, loginUser);
 router.post("/logout", logoutUser);
-router.post("/reset-password", resetPasswordInit);
-router.patch("/reset-password/:token", resetPasswordFinal);
-router.patch("/change-password", changePassword);
+router.post(
+  "/reset-password", validateResetPasswordInit, handleValidationErrors, resetPasswordInit
+);
+router.patch(
+  "/reset-password/:token", validateResetPasswordFinal, handleValidationErrors, resetPasswordFinal
+);
+router.patch("/change-password", validateChangePassword, handleValidationErrors, changePassword);
 
 export default router;

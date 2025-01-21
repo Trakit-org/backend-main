@@ -26,7 +26,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-// Use the routers from all routes
+// Use the routers from all routes with optionalAuth middleware
 app.use("/api/v1/auth", optionalAuth, authRoutes);
 app.use("/api/v1/users", optionalAuth, userRoutes);
 app.use("/api/v1/subscriptions", optionalAuth, subscriptionRoutes);

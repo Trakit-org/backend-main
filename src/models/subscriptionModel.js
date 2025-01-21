@@ -22,7 +22,7 @@ const SubscriptionSchema = new mongoose.Schema(
     },
     billingCycle: {
       type: String,
-      enum: ['Monthly', 'Quarterly', 'Annually', 'OneTime'],
+      enum: ['Monthly', 'Annually', 'Weekly', 'Quarterly', 'One-time'],
       default: 'Monthly'
     },
     nextBillingDate: { type: Date, required: true },

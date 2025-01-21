@@ -10,22 +10,32 @@ import {
   searchSubscriptions,
 } from "../controllers/subscriptionController.js";
 
-const router = express.Router();
+import {
+  validateCreateSubscription,
+  validateSubscriptionId,
+  validateSearchSubscriptions,
+  validateGetAllSubscriptions,
+  validateUpdateSubscription
+} from "../middleware/subscriptionValidator.js";
 
-// TODO: Auth and/or validation for these controllers.
+import { handleValidationErrors } from "../middleware/validationErrorHandler.js";
+
+const router = express.Router();
 
 // Endpoints prefix: api/v1/subscriptions
 // Define routes
 router.route("/")
-  .post(createSubscription)
-  .get(getAllSubscriptions)
+  .post(validateCreateSubscription, handleValidationErrors, createSubscription)
+  .get(validateGetAllSubscriptions, handleValidationErrors, getAllSubscriptions)
   .delete(deleteAllSubscriptions);
 
-router.get("/search", searchSubscriptions);
+router.get("/search", validateSearchSubscriptions, handleValidationErrors, searchSubscriptions);
 
 router.route("/:id")
-  .get(getSubscription)
-  .patch(updateSubscription)
-  .delete(deleteSubscription);
+  .get(validateSubscriptionId, handleValidationErrors, getSubscription)
+  .patch(
+    validateSubscriptionId, validateUpdateSubscription, handleValidationErrors, updateSubscription
+  )
+  .delete(validateSubscriptionId, handleValidationErrors, deleteSubscription);
 
 export default router;
