@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import User from "../models/userModel";
+import User from "../models/userModel.js";
 
 const optionalAuth = async (req, res, next) => {
   const authHeader = req.headers.authorization;
