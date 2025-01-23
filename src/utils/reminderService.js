@@ -29,13 +29,13 @@ export const scheduleReminder = async (reminder) => {
             populate: { path: "user" } // Get user details through subscription
           });
         if (!reminderWithSub || !reminderWithSub.active) {
-          console.log("Reminder no longer active or valid");
+          console.log(`Reminder with ID ${reminder._id} no longer active or valid`);
           return;
         }
 
         const user = reminderWithSub.subscription.user;
         if (!user.enableNotifications) {
-          console.log("User notifications disabled");
+          console.log(`User with ID ${user._id} has notifications disabled`);
           return;
         }
 
