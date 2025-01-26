@@ -14,8 +14,8 @@ export const scheduleReminder = async (reminder) => {
     scheduledTime.getDate(),
     scheduledTime.getMonth() + 1,
   ];
-  
-  const cronPattern = `${min} ${hour} ${date} ${month} *`;  
+
+  const cronPattern = `${min} ${hour} ${date} ${month} *`;
 
   cron.schedule(cronPattern, async () => {
     let attempts = 0;
@@ -73,12 +73,13 @@ export const scheduleReminder = async (reminder) => {
 
 // Initialize existing reminders when server starts
 export const initializeReminders = async () => {
-  const pendingReminders = await Reminder.find({ 
+  const pendingReminders = await Reminder.find({
     sent: false,
     active: true
   });
-  
+
   pendingReminders.forEach(scheduleReminder);
+  console.log("Reminders initialized");
 };
 
 export const setupCleanupJob = async () => {
@@ -106,9 +107,11 @@ export const setupCleanupJob = async () => {
         }
       );
 
-      console.log("Cleanup completed successfully");
+      console.log("Reminder cleanup completed successfully");
     } catch (error) {
       console.error("Failed to cleanup reminders:", error);
     }
   });
+
+  console.log("Reminder cleanup scheduled for midnight (GMT)");
 };

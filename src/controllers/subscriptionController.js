@@ -1,10 +1,10 @@
 import Subscription from "../models/subscriptionModel.js";
+import User from "../models/userModel.js";
 import generateRandomString from "../utils/generateRandomString.js";
 
 const guestMap = new Map();
 const subscriptionMap = new Map();
 
-// TODO: Auth and/or validation for these controllers
 export const getAllSubscriptions = async (req, res) => {
   if (!req.user) {
     try {
@@ -32,19 +32,27 @@ export const getAllSubscriptions = async (req, res) => {
         return res.status(404).json({ msg: "No subscriptions found for this guest" });
       }
 
-      return res.status(200)
-        .json({ nbHits: subscriptions.length, subscriptions });
+      return res.status(200).json({
+        nbHits: subscriptions.length, subscriptions
+      });
     } catch (error) {
       console.error("error fetching guest subscriptions:", error);
       return res.status(500).json({ msg: "Failed to fetch guest subscriptions" });
-    } 
+    }
   }
 
   try {
     const limit = parseInt(req.query.limit) || 10;
     const page = parseInt(req.query.page) || 1;
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
 
-    const subscriptions = await Subscription.find({})
+    const subscriptions = await Subscription
+      .find({
+        "user": req.user._id,
+      })
       .limit(limit)
       .skip((page - 1) * limit);
     if (subscriptions.length === 0) {
@@ -107,7 +115,11 @@ export const createSubscription = async (req, res) => {
         const newSubscriptionID = generateRandomString();
         guestMap.set(newGuestID, [newSubscriptionID]);
         subscriptionMap.set(newSubscriptionID, data);
-        res.cookie('guestID', newGuestID, { httpOnly: true });
+        res.cookie("guestID", newGuestID, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "Strict",
+        });
 
         return res.status(201).json({
           msg: "Subscription created successfully",
@@ -137,14 +149,20 @@ export const createSubscription = async (req, res) => {
   }
 
   try {
-    const data = {
-      ...req.body,
-    };
-    const subscription = await Subscription.create(data);
+    const data = { ...req.body, };
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
 
-    return res
-      .status(201)
-      .json({ msg: "Subscription created successfully", subscription });
+    // Create a subscription for the logged-in user
+    const subscription = await Subscription.create({ ...data, user: req.user._id });
+
+    return res.status(201).json({
+      msg: "Subscription created successfully",
+      subscriptionID: subscription._id,
+      subscription
+    });
   } catch (error) {
     console.error("error creating subscription:", error);
     return res.status(500).json({ msg: "Failed to create subscription" });
@@ -252,6 +270,7 @@ export const deleteAllSubscriptions = async (req, res) => {
       if (!subIDs) {
         return res.status(404).json({ msg: "No subscriptions found to delete" });
       }
+      const count = subIDs.length;
 
       for (const subID of subIDs) {
         const isDeleted = subscriptionMap.delete(subID);
@@ -260,15 +279,21 @@ export const deleteAllSubscriptions = async (req, res) => {
         }
       }
 
-      return res.status(200).json({ msg: "All guest subscriptions deleted successfully" });
+      return res.status(200).json({ msg: `All ${count} subscriptions deleted successfully` });
     } catch (error) {
       console.error("error deleting guest subscriptions:", error);
       return res.status(500).json({ msg: "Failed to delete guest subscriptions" });
-    } 
+    }
   }
 
   try {
-    const result = await Subscription.deleteMany({}); 
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+    const result = await Subscription.deleteMany({
+      "user": req.user._id,
+    });
 
     if (result.deletedCount === 0) {
       return res.status(404).json({ msg: "No subscriptions found to delete" });
@@ -291,8 +316,13 @@ export const searchSubscriptions = async (req, res) => {
     const { service, category, billingCycle, active } = req.query;
     const limit = parseInt(req.query.limit) || 10;
     const page = parseInt(req.query.page) || 1;
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
 
     const filter = {};
+    filter.user = req.user._id;
     if (service) filter.service = new RegExp(service, "i"); // Case-insensitive regex search
     if (category) filter.category = category;
     if (billingCycle) filter.billingCycle = billingCycle;

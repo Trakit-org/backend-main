@@ -8,22 +8,22 @@ const SubscriptionSchema = new mongoose.Schema(
     category: {
       type: String,
       enum: [
-        'Entertainment', 
-        'Productivity', 
-        'News & Magazines', 
-        'Fitness & Health', 
-        'Education', 
-        'Shopping & Deals', 
-        'Food & Drink', 
-        'Finance',
-        'None'
+        "Entertainment",
+        "Productivity",
+        "News & Magazines",
+        "Fitness & Health",
+        "Education",
+        "Shopping & Deals",
+        "Food & Drink",
+        "Finance",
+        "None"
       ],
-      default: 'None'
+      default: "None"
     },
     billingCycle: {
       type: String,
-      enum: ['Monthly', 'Annually', 'Weekly', 'Quarterly', 'One-time'],
-      default: 'Monthly'
+      enum: ["Monthly", "Annually", "Weekly", "Quarterly", "One-time"],
+      default: "Monthly"
     },
     nextBillingDate: { type: Date, required: true },
     notes: { type: String, trim: true },
@@ -35,7 +35,7 @@ const SubscriptionSchema = new mongoose.Schema(
 
 // Middleware to Update Active Status
 SubscriptionSchema.pre("save", function (next) {
-  // Avoid infinite loop when modifying "active" triggers a save. 
+  // Avoid infinite loop when modifying "active" triggers a save.
   if (!this.isModified("nextBillingDate")) {
     return next();
   }
