@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const ReminderSchema = new mongoose.Schema(
   {
-    subscription: { type: mongoose.Schema.Types.ObjectId, ref: "Subscription", required: true },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     reminderTime: { type: Date, required: true },
     message: { type: String, trim: true },
     sent: { type: Boolean, default: false },

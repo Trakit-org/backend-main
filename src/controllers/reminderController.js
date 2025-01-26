@@ -1,6 +1,6 @@
 import Reminder from "../models/reminderModel.js";
+import User from "../models/userModel.js";
 
-// TODO: Auth and/or validation for these controllers.
 export const createReminder = async (req, res) => {
   if (!req.user) {
     return res.status(401).json({ msg: "You must be logged in to create reminders" });
@@ -8,9 +8,19 @@ export const createReminder = async (req, res) => {
 
   try {
     const data = { ...req.body, };
-    const reminder = await Reminder.create(data);
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
 
-    return res.status(201).json({ msg: "Reminder created successfully", reminder });
+    // Create a reminder for the logged-in user
+    const reminder = await Reminder.create({ ...data, user: req.user._id });
+
+    return res.status(201).json({
+      msg: "Reminder created successfully",
+      reminderID: reminder._id,
+      reminder
+    });
   } catch (error) {
     console.error("error creating reminder:", error);
     return res.status(500).json({ msg: "Failed to create reminder" });
@@ -47,7 +57,15 @@ export const getAllReminders = async (req, res) => {
     // Pagination
     const limit = parseInt(req.query.limit) || 10;
     const page = parseInt(req.query.page) || 1;
-    const reminders = await Reminder.find({})
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    const reminders = await Reminder
+      .find({
+        "user": req.user._id,
+      })
       .limit(limit)
       .skip((page - 1) * limit);
 
@@ -116,11 +134,18 @@ export const deleteAllReminders = async (req, res) => {
   }
 
   try {
-    const result = await Reminder.deleteMany({}); 
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
 
+    const result = await Reminder.deleteMany({
+      "user": req.user._id,
+    });
     if (result.deletedCount === 0) {
       return res.status(404).json({ msg: "No reminders found to delete" });
     }
+
     return res.status(200).json({
       msg: `All ${result.deletedCount} reminders deleted successfully`
     });
@@ -141,10 +166,10 @@ export const getUpcomingRenewals = async(req, res) => {
 
     const upcomingReminders = await Reminder
       .find({
-        "subscription.user": req.user._id,
+        "user": req.user._id,
         reminderTime: { $lte: aWeekAhead },
       })
-      .populate("subscription")
+      .populate("reminder")
       .sort({ reminderTime: 1 });
 
     if (upcomingReminders.length === 0) {
@@ -156,4 +181,4 @@ export const getUpcomingRenewals = async(req, res) => {
     console.error("error retrieving upcoming reminders:", error);
     return res.status(500).json({ msg: "Failed to retrieve upcoming reminders" });
   }
-}
+};

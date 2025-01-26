@@ -103,5 +103,5 @@ export const validateUpdateSubscription = [
   body("notes")
     .optional()
     .isString()
-    .withMessage("Notes must be a string"), 
+    .withMessage("Notes must be a string"),
 ];

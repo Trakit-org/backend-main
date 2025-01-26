@@ -35,5 +35,5 @@ export const validateUpdateReminder = [
   body("message")
     .optional()
     .isString()
-    .withMessage("Mesage must be a string"), 
+    .withMessage("Mesage must be a string"),
 ];
