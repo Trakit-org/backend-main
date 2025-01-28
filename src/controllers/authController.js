@@ -11,8 +11,10 @@ export const registerUser = async (req, res) => {
     const data = { ...otherData, hashedPassword };
     await User.create(data);
 
-    // Redirect to login route after successful sign-up
-    return res.redirect(303, "/login");
+    return res.status(201).json({ 
+      msg: "Successfully signed up! Proceed to log in", 
+      redirectUrl: "/login" 
+    });
   } catch (error) {
     console.error("error registering user:", error);
 
@@ -45,16 +47,10 @@ export const loginUser = async (req, res) => {
       { expiresIn: "2h" }
     );
 
-    res.cookie("authToken", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 2 * 60 * 60 * 1000,
-    });
-
     return res.status(200).json({
       msg: "Logged in successfully",
-      user: { _id, fullName, email, enableNotifications, subscriptions }
+      user: { _id, fullName, email, enableNotifications, subscriptions },
+      token
     });
   } catch (error) {
     console.error("error logging in user:", error);
@@ -67,12 +63,7 @@ export const logoutUser = (req, res) => {
     return res.status(401).json({ msg: "Not logged in" });
   }
 
-  res.clearCookie("authToken", {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-  });
-
+  // The frontend will remove the token from storage
   return res.status(200).json({ msg: "Logged out successfully" });
 };
 

@@ -2,9 +2,12 @@ import jwt from "jsonwebtoken";
 import User from "../models/userModel.js";
 
 const optionalAuth = async (req, res, next) => {
-  const token = req.cookies.authToken;
+  const token = req.headers.authorization?.startsWith('Bearer ')
+    ? req.headers.authorization.split(' ')[1]
+    : null;
   if (!token) {
-    return res.status(401).json({ error: "Authentication required" });
+    req.user = null; // No token found
+    return next();
   }
 
   try {

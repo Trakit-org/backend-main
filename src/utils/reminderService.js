@@ -90,14 +90,14 @@ export const setupCleanupJob = async () => {
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
       // Delete old, sent reminders
-      const result = await Reminder.deleteMany({
+      const deleteResult = await Reminder.deleteMany({
         sent: true,
         sentTime: { $lt: thirtyDaysAgo },
       });
-      console.log(`${result.deletedCount} old reminders deleted.`);
+      console.log(`${deleteResult.deletedCount} old reminders deleted`);
 
       // Deactivate expired, unsent reminders
-      await Reminder.updateMany(
+      const updateResult = await Reminder.updateMany(
         {
           sent: false,
           reminderTime: { $lt: new Date() }
@@ -106,6 +106,7 @@ export const setupCleanupJob = async () => {
           $set: { active: false }
         }
       );
+      console.log(`${updateResult.modifiedCount} expired reminders deactivated`);
 
       console.log("Reminder cleanup completed successfully");
     } catch (error) {
