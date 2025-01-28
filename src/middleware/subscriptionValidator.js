@@ -8,9 +8,7 @@ export const validateCreateSubscription = [
     .withMessage("Service must be a string"),
   body("price")
     .notEmpty()
-    .withMessage("Price is required")
-    .isInt()
-    .withMessage("Price must be a positive integer"),
+    .withMessage("Price is required"),
   body("category")
     .optional()
     .isIn([
