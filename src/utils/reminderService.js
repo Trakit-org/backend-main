@@ -83,8 +83,8 @@ export const initializeReminders = async () => {
 };
 
 export const setupCleanupJob = async () => {
-  // Run at midnight every day
-  cron.schedule("0 0 * * *", async () => {
+  // Run at midnight (GMT) every day
+  cron.schedule("0 1 * * *", async () => {
     try {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
