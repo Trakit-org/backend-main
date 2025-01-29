@@ -82,9 +82,7 @@ export const validateUpdateSubscription = [
     .isString()
     .withMessage("Service must be a string"),
   body("price")
-    .optional()
-    .isInt()
-    .withMessage("Price must be a positive integer"),
+    .optional(),
   body("category")
     .optional()
     .isIn([
