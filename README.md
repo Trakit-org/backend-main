@@ -50,27 +50,12 @@ Trakit is a subscription tracking app that helps users manage their recurring ex
    MONGO_URI=your_mongodb_connection_string
    PORT=your_port_number
    JWT_SECRET=your_jwt_secret
-   CLIENT_URL=your_frontend_url
-   EMAIL_USER=your_organization_email
+   CLIENT_URL=your_frontend_url(if NODE_ENV is set to production)
+   EMAIL_USER=your_user_email(used to receive reminder mails)
    EMAIL_PASS=your_email_app_password
-   EMAIL_FROM=your_organization_email
+   EMAIL_FROM=your_organization_email(used to send reminder mails)
    ```
 4. Start the server:
-   ```sh
-   npm start
-   ```
-
-### Frontend Setup
-1. Clone the repository:
-   ```sh
-   git clone https://github.com/Trakit-org/frontend-main.git
-   cd frontend-main
-   ```
-2. Install dependencies:
-   ```sh
-   npm install
-   ```
-3. Start the development server:
    ```sh
    npm start
    ```
